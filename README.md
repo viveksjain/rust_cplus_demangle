@@ -1,7 +1,8 @@
 # cplus_demangle
 
 ## cplus_demangle
-This library converts C++ mangled symbol names to human-readable strings. It is a small and safe Rust wrapper to GNU libiberty's C function `cplus_demangle`.
+[![Crates.io](https://img.shields.io/crates/v/cplus_demangle)](https://crates.io/crates/cplus_demangle)
+This library converts C++ mangled symbol names to human-readable strings. It is a safe Rust wrapper to GNU libiberty's C function `cplus_demangle`.
 
 ### Example
 Suppose you compile the following C++ program:

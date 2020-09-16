@@ -1,6 +1,7 @@
 //! # cplus_demangle
+//! [![Crates.io](https://img.shields.io/crates/v/cplus_demangle)](https://crates.io/crates/cplus_demangle)
 //! This library converts C++ mangled symbol names to human-readable strings. It is a safe Rust wrapper to GNU libiberty's C function `cplus_demangle`.
-//! 
+//!
 //! ## Example
 //! Suppose you compile the following C++ program:
 //! ```cpp
@@ -8,7 +9,7 @@
 //!   void myfn(int x) { }
 //! }
 //! ```
-//! 
+//!
 //! In the resulting binary, the symbol that gets generated for `myfn` is `_ZN4test4myfnEi`. We can convert it back with this Rust code:
 //! ```rust
 //! assert_eq!(cplus_demangle::demangle("_ZN4test4myfnEi").unwrap(), "test::myfn(int)");
@@ -18,7 +19,11 @@ use libc::{c_char, c_int};
 use std::ffi::{CStr, CString};
 
 extern "C" {
-    fn cplus_demangle_wrapper(mangled_name: *const c_char, show_params: c_int, show_ansi: c_int) -> *mut c_char;
+    fn cplus_demangle_wrapper(
+        mangled_name: *const c_char,
+        show_params: c_int,
+        show_ansi: c_int,
+    ) -> *mut c_char;
 }
 
 #[derive(Debug)]
@@ -57,7 +62,11 @@ pub fn demangle_with_options(mangled_name: &str, options: Options) -> Result<Str
         Err(std::ffi::NulError { .. }) => return Err(Error("mangled_name contains null")),
     };
     let result: *mut c_char = unsafe {
-        cplus_demangle_wrapper(mangled_name.as_ptr(), options.show_params as i32, options.show_ansi as i32)
+        cplus_demangle_wrapper(
+            mangled_name.as_ptr(),
+            options.show_params as i32,
+            options.show_ansi as i32,
+        )
     };
     if result.is_null() {
         // Unfortunately cplus_demangle appears to give us precisely 0 helpful
@@ -77,10 +86,14 @@ mod tests {
             "boost::cpp_regex_traits<char>::isctype(char, unsigned int) const"
         );
         assert_eq!(
-            crate::demangle_with_options("_ZNK5boost16cpp_regex_traitsIcE7isctypeEcj", crate::Options {
-                show_params: false,
-                show_ansi: true,
-            }).unwrap(),
+            crate::demangle_with_options(
+                "_ZNK5boost16cpp_regex_traitsIcE7isctypeEcj",
+                crate::Options {
+                    show_params: false,
+                    show_ansi: true,
+                }
+            )
+            .unwrap(),
             "boost::cpp_regex_traits<char>::isctype"
         );
     }
