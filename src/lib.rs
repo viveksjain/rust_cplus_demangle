@@ -1,3 +1,19 @@
+//! # cplus_demangle
+//! This library converts C++ mangled symbol names to human-readable strings. It is a safe Rust wrapper to GNU libiberty's C function `cplus_demangle`.
+//! 
+//! ## Example
+//! Suppose you compile the following C++ program:
+//! ```cpp
+//! namespace test {
+//!   void myfn(int x) { }
+//! }
+//! ```
+//! 
+//! In the resulting binary, the symbol that gets generated for `myfn` is `_ZN4test4myfnEi`. We can convert it back with this Rust code:
+//! ```rust
+//! assert_eq!(cplus_demangle::demangle("_ZN4test4myfnEi").unwrap(), "test::myfn(int)");
+//! ```
+
 use libc::{c_char, c_int};
 use std::ffi::{CStr, CString};
 
@@ -9,11 +25,13 @@ extern "C" {
 pub struct Error(&'static str);
 
 /// Description of options from demangle.h:
+/// ```
 /// #define DMGL_PARAMS      (1 << 0)       /* Include function args */
 /// #define DMGL_ANSI        (1 << 1)       /* Include const, volatile, etc */
+/// ```
 pub struct Options {
-    show_params: bool,
-    show_ansi: bool,
+    pub show_params: bool,
+    pub show_ansi: bool,
 }
 
 impl Options {
@@ -25,10 +43,14 @@ impl Options {
     }
 }
 
+/// Demangle the given name, with default options.
 pub fn demangle(mangled_name: &str) -> Result<String, Error> {
     demangle_with_options(mangled_name, Options::default())
 }
 
+/// Demangle the given name with the specified options.
+///
+/// Fails if: the name contains a null character, or demangling fails.
 pub fn demangle_with_options(mangled_name: &str, options: Options) -> Result<String, Error> {
     let mangled_name = match CString::new(mangled_name) {
         Ok(mangled_name) => mangled_name,
@@ -38,6 +60,8 @@ pub fn demangle_with_options(mangled_name: &str, options: Options) -> Result<Str
         cplus_demangle_wrapper(mangled_name.as_ptr(), options.show_params as i32, options.show_ansi as i32)
     };
     if result.is_null() {
+        // Unfortunately cplus_demangle appears to give us precisely 0 helpful
+        // error info, we have to go with a generic message.
         return Err(Error("Failed to demangle"));
     }
     let demangled = unsafe { CStr::from_ptr(result) };
