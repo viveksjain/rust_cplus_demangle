@@ -2,7 +2,7 @@
 name = "cplus_demangle"
 description = "Rust wrapper for GNU libiberty's cplus_demangle to demangle C++ symbols"
 version = "0.1.1"
-authors = ["Vivek Jain <vivek@vivekja.in"]
+authors = ["Vivek Jain <vivek@vivekja.in>"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/viveksjain/rust_cplus_demangle"
 keywords = ["demangle", "symbolicate", "c-plus-plus", "cpp"]
