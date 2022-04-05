@@ -1,4 +1,4 @@
-#include <libiberty/demangle.h>
+#include <demangle.h>
 
 char* cplus_demangle_wrapper(const char* mangled_name, int show_params, int show_ansi) {
   // This is a simple wrapper solely to allow using the demangle macros
